@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 function SearchableList({ items, itemKeyFn, children }) {
+  const lastSearchTermChange = useRef();
+
   const [searchTerm, setSearchTerm] = useState('');
 
   const searchResults = items.filter((item) =>
@@ -9,8 +11,16 @@ function SearchableList({ items, itemKeyFn, children }) {
       .includes(searchTerm.toLocaleLowerCase()),
   );
 
+  // debouncing the search
   function handleChange(event) {
-    setSearchTerm(event.target.value);
+    if (lastSearchTermChange.current) {
+      clearTimeout(lastSearchTermChange.current);
+    }
+
+    lastSearchTermChange.current = setTimeout(() => {
+      lastSearchTermChange.current = null;
+      setSearchTerm(event.target.value);
+    }, 1000);
   }
 
   return (
